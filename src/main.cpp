@@ -65,8 +65,6 @@ void onMqttConnect(bool) {
 
     // Subscribe to topics:
     mqttClient.subscribe("device/room1-table", 0);
-
-    readTimer.once(3, readSensor);
 }
 
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
