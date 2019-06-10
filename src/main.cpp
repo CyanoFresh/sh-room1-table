@@ -16,6 +16,23 @@ Ticker buttonsReadTimer;
 
 DHTesp dht;
 
+void readSensor() {
+    float t = dht.getTemperature();
+    auto h = (int) dht.getHumidity();
+
+    if (dht.getStatus() == DHTesp::ERROR_NONE) {
+        mqttClient.publish("variable/room1-air_temperature", 0, false, String(t).c_str());
+        mqttClient.publish("variable/room1-air_humidity", 0, false, String(h).c_str());
+
+        Serial.print("Temp: ");
+        Serial.print(t);
+        Serial.print(", humi: ");
+        Serial.println(h);
+    } else {
+        Serial.println("Error reading sensor");
+    }
+}
+
 void connectToWifi() {
     Serial.println("Connecting to Wi-Fi...");
     WiFi.begin(config::WIFI_SSID, config::WIFI_PASSWORD);
@@ -48,6 +65,8 @@ void onMqttConnect(bool) {
 
     // Subscribe to topics:
     mqttClient.subscribe("device/room1-table", 0);
+
+    readTimer.once(3, readSensor);
 }
 
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
@@ -140,20 +159,7 @@ void loop() {
     unsigned long time = millis();
 
     if (time - last >= config::SENSOR_READ_INTERVAL * 1000) {
-        float t = dht.getTemperature();
-        auto h = (int) dht.getHumidity();
-
-        if (dht.getStatus() == DHTesp::ERROR_NONE) {
-            mqttClient.publish("variable/room1-air_temperature", 0, false, String(t).c_str());
-            mqttClient.publish("variable/room1-air_humidity", 0, false, String(h).c_str());
-
-            Serial.print("Temp: ");
-            Serial.print(t);
-            Serial.print(", humi: ");
-            Serial.println(h);
-        } else {
-            Serial.println("Error reading sensor");
-        }
+        readSensor();
 
         last = time;
     }
