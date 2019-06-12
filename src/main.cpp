@@ -28,7 +28,8 @@ void readSensor() {
         Serial.print(", humi: ");
         Serial.println(h);
     } else {
-        Serial.println("Error reading sensor");
+        Serial.println(F("Error reading sensor"));
+        Serial.println(dht.getStatusString());
     }
 }
 
@@ -46,7 +47,7 @@ void readButtons() {
     if (btn1State != lastBtn1State) {
         if (btn1State == LOW) {   // button 1 pressed
             mqttClient.publish("switch/room1-light/toggle", 0, false);
-            Serial.println("Button 1 pressed");
+            Serial.println(F("Button 1 pressed"));
         }
 
         lastBtn1State = btn1State;
@@ -55,7 +56,7 @@ void readButtons() {
     if (btn2State != lastBtn2State) {
         if (btn2State == LOW) {   // button 2 pressed
             mqttClient.publish("switch/room1-secondary_light/toggle", 0, false);
-            Serial.println("Button 2 pressed");
+            Serial.println(F("Button 2 pressed"));
         }
 
         lastBtn2State = btn2State;
@@ -64,7 +65,7 @@ void readButtons() {
     if (btn3State != lastBtn3State) {
         if (btn3State == LOW) {   // button 3 pressed
             mqttClient.publish("switch/room1-fan/toggle", 0, false);
-            Serial.println("Button 3 pressed");
+            Serial.println(F("Button 3 pressed"));
         }
 
         lastBtn3State = btn3State;
@@ -73,7 +74,7 @@ void readButtons() {
     if (btn4State != lastBtn4State) {
         if (btn4State == LOW) {   // button 4 pressed
             mqttClient.publish("buzzer/corridor-buzzer/unlock", 0, false);
-            Serial.println("Button 4 pressed");
+            Serial.println(F("Button 4 pressed"));
         }
 
         lastBtn4State = btn4State;
@@ -81,41 +82,35 @@ void readButtons() {
 }
 
 void connectToWifi() {
-    Serial.println("Connecting to Wi-Fi...");
+    Serial.println(F("Connecting to Wi-Fi..."));
     WiFi.begin(config::WIFI_SSID, config::WIFI_PASSWORD);
 }
 
 void connectToMqtt() {
-    Serial.println("Connecting to MQTT...");
+    Serial.println(F("Connecting to MQTT..."));
     mqttClient.connect();
 }
 
 void onWifiConnect(const WiFiEventStationModeGotIP &event) {
-    Serial.println("Connected to Wi-Fi.");
-    digitalWrite(LED_BUILTIN, LOW);
-
     connectToMqtt();
 }
 
 void onWifiDisconnect(const WiFiEventStationModeDisconnected &event) {
-    Serial.print("Disconnected from Wi-Fi: ");
+    Serial.print(F("Disconnected from Wi-Fi: "));
     Serial.println(event.reason);
-    digitalWrite(LED_BUILTIN, HIGH);
+    digitalWrite(LED_BUILTIN, LOW);
 
     mqttReconnectTimer.detach();
     wifiReconnectTimer.once(2, connectToWifi);
 }
 
 void onMqttConnect(bool) {
-    Serial.println("Connected to MQTT.");
-    digitalWrite(LED_BUILTIN, LOW);
-
-    // Subscribe to topics:
-    mqttClient.subscribe("device/room1-table", 0);
+    Serial.println(F("Connected to MQTT."));
+    digitalWrite(LED_BUILTIN, HIGH);
 }
 
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
-    Serial.print("Disconnected from MQTT. Reason: ");
+    Serial.print(F("Disconnected from MQTT. Reason: "));
     Serial.println((int) reason);
     digitalWrite(LED_BUILTIN, HIGH);
 
@@ -131,7 +126,7 @@ void setup() {
     pinMode(config::BTN4_PIN, INPUT_PULLUP);
     pinMode(LED_BUILTIN, OUTPUT);
 
-    digitalWrite(LED_BUILTIN, HIGH);
+    digitalWrite(LED_BUILTIN, LOW);
 
     Serial.begin(115200);
     Serial.println();
