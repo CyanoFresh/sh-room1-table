@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.2)
-project(room1-table)
+project(sh-room1-table)
 
 include(CMakeListsPrivate.txt)
 

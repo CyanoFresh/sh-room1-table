@@ -11,7 +11,6 @@ WiFiEventHandler wifiConnectHandler;
 WiFiEventHandler wifiDisconnectHandler;
 Ticker wifiReconnectTimer;
 
-Ticker readTimer;
 Ticker buttonsReadTimer;
 
 DHTesp dht;
@@ -30,50 +29,6 @@ void readSensor() {
         Serial.println(h);
     } else {
         Serial.println("Error reading sensor");
-    }
-}
-
-void connectToWifi() {
-    Serial.println("Connecting to Wi-Fi...");
-    WiFi.begin(config::WIFI_SSID, config::WIFI_PASSWORD);
-}
-
-void connectToMqtt() {
-    Serial.println("Connecting to MQTT...");
-    mqttClient.connect();
-}
-
-void onWifiConnect(const WiFiEventStationModeGotIP &event) {
-    Serial.println("Connected to Wi-Fi.");
-    digitalWrite(LED_BUILTIN, LOW);
-
-    connectToMqtt();
-}
-
-void onWifiDisconnect(const WiFiEventStationModeDisconnected &event) {
-    Serial.print("Disconnected from Wi-Fi: ");
-    Serial.println(event.reason);
-    digitalWrite(LED_BUILTIN, HIGH);
-
-    mqttReconnectTimer.detach();
-    wifiReconnectTimer.once(2, connectToWifi);
-}
-
-void onMqttConnect(bool) {
-    Serial.println("Connected to MQTT.");
-    digitalWrite(LED_BUILTIN, LOW);
-
-    // Subscribe to topics:
-    mqttClient.subscribe("device/room1-table", 0);
-}
-
-void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
-    Serial.print("Disconnected from MQTT. Reason: ");
-    Serial.println((int) reason);
-    digitalWrite(LED_BUILTIN, HIGH);
-
-    if (WiFi.isConnected()) {
-        mqttReconnectTimer.once(2, connectToMqtt);
     }
 }
 
@@ -125,15 +80,62 @@ void readButtons() {
     }
 }
 
-void setup() {
-    Serial.begin(115200);
-    Serial.println();
-    Serial.println();
+void connectToWifi() {
+    Serial.println("Connecting to Wi-Fi...");
+    WiFi.begin(config::WIFI_SSID, config::WIFI_PASSWORD);
+}
 
+void connectToMqtt() {
+    Serial.println("Connecting to MQTT...");
+    mqttClient.connect();
+}
+
+void onWifiConnect(const WiFiEventStationModeGotIP &event) {
+    Serial.println("Connected to Wi-Fi.");
+    digitalWrite(LED_BUILTIN, LOW);
+
+    connectToMqtt();
+}
+
+void onWifiDisconnect(const WiFiEventStationModeDisconnected &event) {
+    Serial.print("Disconnected from Wi-Fi: ");
+    Serial.println(event.reason);
+    digitalWrite(LED_BUILTIN, HIGH);
+
+    mqttReconnectTimer.detach();
+    wifiReconnectTimer.once(2, connectToWifi);
+}
+
+void onMqttConnect(bool) {
+    Serial.println("Connected to MQTT.");
+    digitalWrite(LED_BUILTIN, LOW);
+
+    // Subscribe to topics:
+    mqttClient.subscribe("device/room1-table", 0);
+}
+
+void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
+    Serial.print("Disconnected from MQTT. Reason: ");
+    Serial.println((int) reason);
+    digitalWrite(LED_BUILTIN, HIGH);
+
+    if (WiFi.isConnected()) {
+        mqttReconnectTimer.once(2, connectToMqtt);
+    }
+}
+
+void setup() {
     pinMode(config::BTN1_PIN, INPUT_PULLUP);
     pinMode(config::BTN2_PIN, INPUT_PULLUP);
     pinMode(config::BTN3_PIN, INPUT_PULLUP);
     pinMode(config::BTN4_PIN, INPUT_PULLUP);
+    pinMode(LED_BUILTIN, OUTPUT);
+
+    digitalWrite(LED_BUILTIN, HIGH);
+
+    Serial.begin(115200);
+    Serial.println();
+    Serial.println();
 
     wifiConnectHandler = WiFi.onStationModeGotIP(onWifiConnect);
     wifiDisconnectHandler = WiFi.onStationModeDisconnected(onWifiDisconnect);
