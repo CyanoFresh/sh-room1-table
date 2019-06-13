@@ -44,6 +44,13 @@ void readSensor() {
     if (dht.getStatus() == DHTesp::ERROR_NONE) {
         readIteration++;
 
+        Serial.print("[");
+        Serial.print(readIteration);
+        Serial.print("] T: ");
+        Serial.print(t);
+        Serial.print(", h: ");
+        Serial.println(h);
+
         tSum += t;
         hSum += h;
 
@@ -54,13 +61,6 @@ void readSensor() {
             tSum = 0;
             hSum = 0;
         }
-
-        Serial.print("[");
-        Serial.print(readIteration);
-        Serial.print("] T: ");
-        Serial.print(t);
-        Serial.print(", h: ");
-        Serial.println(h);
     } else {
         Serial.print(F("Error reading sensor: "));
         Serial.println(dht.getStatusString());
