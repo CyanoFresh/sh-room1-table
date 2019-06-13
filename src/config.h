@@ -20,7 +20,8 @@ namespace config {
 
     const uint8_t BTN_DEBOUNCE_PERIOD = 70;
 
-    const uint8_t SENSOR_READ_INTERVAL = 30;
+    const uint8_t SENSOR_READ_INTERVAL = 100;
+    const uint8_t SENSOR_READ_COUNT = 3;
 }
 
 #endif

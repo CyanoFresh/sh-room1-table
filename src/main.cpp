@@ -15,28 +15,57 @@ Ticker buttonsReadTimer;
 
 DHTesp dht;
 
-void readSensor() {
-    float t = dht.getTemperature();
-    auto h = (int) dht.getHumidity();
-
-    if (dht.getStatus() == DHTesp::ERROR_NONE) {
-        mqttClient.publish("variable/room1-air_temperature", 0, false, String(t).c_str());
-        mqttClient.publish("variable/room1-air_humidity", 0, false, String(h).c_str());
-
-        Serial.print("Temp: ");
-        Serial.print(t);
-        Serial.print(", humi: ");
-        Serial.println(h);
-    } else {
-        Serial.println(F("Error reading sensor"));
-        Serial.println(dht.getStatusString());
-    }
-}
-
 bool lastBtn1State = HIGH;
 bool lastBtn2State = HIGH;
 bool lastBtn3State = HIGH;
 bool lastBtn4State = HIGH;
+
+uint8_t readIteration = 0;
+int16_t tSum = 0;
+uint16_t hSum = 0;
+
+void sendData() {
+    double t = tSum / (config::SENSOR_READ_COUNT * 10.0);
+    double h = hSum / (config::SENSOR_READ_COUNT * 1.0);
+
+    mqttClient.publish("variable/room1-air_temperature", 0, false, String(t, 1).c_str());
+    mqttClient.publish("variable/room1-air_humidity", 0, false, String(h).c_str());
+
+    Serial.print("Sent. T: ");
+    Serial.print(t);
+    Serial.print(", h: ");
+    Serial.println(h);
+}
+
+void readSensor() {
+    auto t = (int16_t) dht.getTemperature() * 10;
+    auto h = (uint16_t) dht.getHumidity();
+
+    if (dht.getStatus() == DHTesp::ERROR_NONE) {
+        readIteration++;
+
+        Serial.print("[");
+        Serial.print(readIteration);
+        Serial.print("] T: ");
+        Serial.print(t);
+        Serial.print(", h: ");
+        Serial.println(h);
+
+        tSum += t;
+        hSum += h;
+
+        if (readIteration == config::SENSOR_READ_COUNT) {
+            sendData();
+
+            readIteration = 0;
+            tSum = 0;
+            hSum = 0;
+        }
+    } else {
+        Serial.print(F("Error reading sensor: "));
+        Serial.println(dht.getStatusString());
+    }
+}
 
 void readButtons() {
     bool btn1State = digitalRead(config::BTN1_PIN);
@@ -91,7 +120,7 @@ void connectToMqtt() {
     mqttClient.connect();
 }
 
-void onWifiConnect(const WiFiEventStationModeGotIP &event) {
+void onWifiConnect(const WiFiEventStationModeGotIP &) {
     connectToMqtt();
 }
 
@@ -112,7 +141,8 @@ void onMqttConnect(bool) {
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
     Serial.print(F("Disconnected from MQTT. Reason: "));
     Serial.println((int) reason);
-    digitalWrite(LED_BUILTIN, HIGH);
+
+    digitalWrite(LED_BUILTIN, LOW);
 
     if (WiFi.isConnected()) {
         mqttReconnectTimer.once(2, connectToMqtt);
