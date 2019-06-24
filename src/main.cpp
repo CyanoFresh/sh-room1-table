@@ -25,7 +25,7 @@ int16_t tSum = 0;
 uint16_t hSum = 0;
 
 void sendData() {
-    double t = tSum / (config::SENSOR_READ_COUNT * 10.0);
+    double t = tSum / (config::SENSOR_READ_COUNT * 1.0);
     double h = hSum / (config::SENSOR_READ_COUNT * 1.0);
 
     mqttClient.publish("variable/room1-air_temperature", 0, false, String(t, 1).c_str());
@@ -38,7 +38,7 @@ void sendData() {
 }
 
 void readSensor() {
-    auto t = (int16_t) dht.getTemperature() * 10;
+    auto t = (int16_t) dht.getTemperature();
     auto h = (uint16_t) dht.getHumidity();
 
     if (dht.getStatus() == DHTesp::ERROR_NONE) {
@@ -173,7 +173,7 @@ void setup() {
 
     connectToWifi();
 
-    dht.setup(config::DHT_PIN, DHTesp::DHT22);
+    dht.setup(config::DHT_PIN, DHTesp::DHT11);
 
     buttonsReadTimer.attach_ms(config::BTN_DEBOUNCE_PERIOD, readButtons);
 }

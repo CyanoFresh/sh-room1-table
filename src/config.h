@@ -16,12 +16,12 @@ namespace config {
     const uint8_t BTN2_PIN = D2;
     const uint8_t BTN3_PIN = D3;
     const uint8_t BTN4_PIN = D5;
-    const uint8_t DHT_PIN = D4;
+    const uint8_t DHT_PIN = D6;
 
     const uint8_t BTN_DEBOUNCE_PERIOD = 70;
 
-    const uint8_t SENSOR_READ_INTERVAL = 100;
-    const uint8_t SENSOR_READ_COUNT = 3;
+    const uint8_t SENSOR_READ_INTERVAL = 36;
+    const uint8_t SENSOR_READ_COUNT = 5;
 }
 
 #endif
