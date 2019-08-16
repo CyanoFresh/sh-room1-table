@@ -31,10 +31,10 @@ void sendData() {
     mqttClient.publish("variable/room1-air_temperature", 0, false, String(t, 1).c_str());
     mqttClient.publish("variable/room1-air_humidity", 0, false, String(h).c_str());
 
-    Serial.print("Sent. T: ");
-    Serial.print(t);
-    Serial.print(", h: ");
-    Serial.println(h);
+//    Serial.print("Sent. T: ");
+//    Serial.print(t);
+//    Serial.print(", h: ");
+//    Serial.println(h);
 }
 
 void readSensor() {
@@ -44,12 +44,12 @@ void readSensor() {
     if (dht.getStatus() == DHTesp::ERROR_NONE) {
         readIteration++;
 
-        Serial.print("[");
-        Serial.print(readIteration);
-        Serial.print("] T: ");
-        Serial.print(t);
-        Serial.print(", h: ");
-        Serial.println(h);
+//        Serial.print("[");
+//        Serial.print(readIteration);
+//        Serial.print("] T: ");
+//        Serial.print(t);
+//        Serial.print(", h: ");
+//        Serial.println(h);
 
         tSum += t;
         hSum += h;
@@ -76,7 +76,7 @@ void readButtons() {
     if (btn1State != lastBtn1State) {
         if (btn1State == LOW) {   // button 1 pressed
             mqttClient.publish("switch/room1-light/toggle", 0, false);
-            Serial.println(F("Button 1 pressed"));
+//            Serial.println(F("Button 1 pressed"));
         }
 
         lastBtn1State = btn1State;
@@ -85,7 +85,7 @@ void readButtons() {
     if (btn2State != lastBtn2State) {
         if (btn2State == LOW) {   // button 2 pressed
             mqttClient.publish("switch/room1-secondary_light/toggle", 0, false);
-            Serial.println(F("Button 2 pressed"));
+//            Serial.println(F("Button 2 pressed"));
         }
 
         lastBtn2State = btn2State;
@@ -94,7 +94,7 @@ void readButtons() {
     if (btn3State != lastBtn3State) {
         if (btn3State == LOW) {   // button 3 pressed
             mqttClient.publish("switch/room1-fan/toggle", 0, false);
-            Serial.println(F("Button 3 pressed"));
+//            Serial.println(F("Button 3 pressed"));
         }
 
         lastBtn3State = btn3State;
@@ -103,7 +103,7 @@ void readButtons() {
     if (btn4State != lastBtn4State) {
         if (btn4State == LOW) {   // button 4 pressed
             mqttClient.publish("buzzer/corridor-buzzer/unlock", 0, false);
-            Serial.println(F("Button 4 pressed"));
+//            Serial.println(F("Button 4 pressed"));
         }
 
         lastBtn4State = btn4State;
